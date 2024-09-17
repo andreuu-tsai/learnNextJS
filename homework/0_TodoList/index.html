@@ -1,0 +1,79 @@
+<html>
+    <head>
+        <style>
+            div[isDone="1"] input[type="text"] {
+                text-decoration: line-through;
+                color: #888;
+            }
+        </style>
+    </head>
+    <body>
+        <header>
+            <h1>Todo List</h1>
+        </header>
+        <main>
+            <div>
+                <input type="text" id="task-name-input" placeholder="Add new task">
+                <input type="button" value="Add Task" id="add-task" onclick="addEntry()">
+            </div>
+            <div id="entries-container">
+            </div>
+        </main>
+        <footer>
+
+        </footer>
+        <script>
+            
+            function createEntry(content){
+
+                const entry = document.createElement("div");
+                entry.setAttribute("isDone", 0)
+
+                // input框框
+                const text_input = document.createElement("input");
+                text_input.type = "text";
+                text_input.value = content;
+                
+                // 完成按鈕
+                const doneButton = document.createElement("input");
+                doneButton.type = "button";
+                doneButton.value = "Done";
+                doneButton.onclick = () => {
+                    if (entry.getAttribute("isDone") == 1){
+                        entry.setAttribute("isDone", 0);
+                        doneButton.value = "Done";
+                    } else{
+                        entry.setAttribute("isDone", 1);
+                        doneButton.value = "Undo";
+                    }
+                }
+
+                // 刪除按鈕
+                const deleteButton = document.createElement("input");
+                deleteButton.type = "button";
+                deleteButton.value = "Delete";
+                deleteButton.onclick = () => {
+                    entry.remove();
+                }
+
+                entry.appendChild(text_input);
+                entry.appendChild(doneButton);
+                entry.appendChild(deleteButton);
+
+                return entry;
+            }
+
+            function addEntry(){
+                const container = document.getElementById("entries-container");
+                const taskNameInput = document.getElementById("task-name-input");
+                if (taskNameInput.value.trim() == ""){
+                    return
+                }
+                const entry = createEntry(taskNameInput.value);
+                taskNameInput.value = "";
+                container.insertBefore(entry, container.firstChild);
+
+            }
+        </script>
+    </body>
+</html>
