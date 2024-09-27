@@ -2,35 +2,49 @@ import React from "react";
 import { v4 as uuidv4 } from 'uuid'
 
 function TodoList() {
-    const [todoList, setTodoList] = React.useState([]);
+    const [todoMap, setTodoMap] = React.useState(new Map());
+    const [todoOrder, setTodoOrder] = React.useState([]);
     const [inputText, setInputText] = React.useState("");
 
     function addTodo(name) {
         if (name.trim() === "") return  
-        let todo = {
-            id: uuidv4(),
+        const id = uuidv4();
+        let newTodo = {
+            id: id,
             name: name,
             isDone: false
         };
-        setTodoList(l => [todo, ...l])
+        setTodoMap(prevMap => new Map(prevMap).set(id, newTodo));
+        setTodoOrder(l => [id, ...l]);
         setInputText("")
     }
 
     function deleteHandler(id){
-        setTodoList(l => l.filter(e => e.id !== id))
+        setTodoMap(prevMap => {
+            const newMap = new Map(prevMap);
+            newMap.delete(id);
+            return newMap;
+        })
+        setTodoOrder(prevOrder => prevOrder.filter( i => i !== id))
     }
 
     function doneHandler(id) {
-        setTodoList(l => l.map(
-            todo => todo.id === id ? {...todo, isDone: !todo.isDone} : todo
-        ))
+        setTodoMap(prevMap => {
+            const newMap = new Map(prevMap);
+            const todo = newMap.get(id);
+            newMap.set(id, {...todo, isDone: !todo.isDone})
+            return newMap;
+        })
     }
 
     function updateNameHandler(id, newName) {
         if (newName.trim() === "") return;
-        setTodoList(l => l.map(
-            todo => todo.id === id ? {...todo, name: newName} : todo
-        ))
+        setTodoMap(prevMap => {
+            const newMap = new Map(prevMap);
+            const todo = newMap.get(id);
+            newMap.set(id, {...todo, name: newName})
+            return newMap;
+        })
     }
 
     return (
@@ -45,10 +59,10 @@ function TodoList() {
                 placeholder="Something to do"
             />
             <button onClick={() => addTodo(inputText)}>Add</button>
-            {todoList.map((todo) => (
+            {todoOrder.map(id => (
                 <Entry 
-                    key={todo.id} 
-                    todo={todo} 
+                    key={id} 
+                    todo={todoMap.get(id)} 
                     deleteHandler={deleteHandler}
                     doneHandler={doneHandler}
                     updateNameHandler={updateNameHandler}
