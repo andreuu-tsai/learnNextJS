@@ -1,49 +1,55 @@
-import React from "react";
+import { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
+import Entry from "./Entry";
 
 function TodoList() {
-  const [todoMap, setTodoMap] = React.useState(new Map());
-  const [todoOrder, setTodoOrder] = React.useState([]);
-  const [inputText, setInputText] = React.useState("");
+  const [todos, setTodos] = useState({
+    todoMap: new Map(),
+    todoOrder: [],
+  });
+  const [inputText, setInputText] = useState("");
 
   function addTodo(name) {
     if (name.trim() === "") return;
     const id = uuidv4();
-    let newTodo = {
+    const newTodo = {
       id: id,
       name: name,
       isDone: false,
     };
-    setTodoMap((prevMap) => new Map(prevMap).set(id, newTodo));
-    setTodoOrder((l) => [id, ...l]);
+    setTodos((prevTodos) => {
+      const newMap = new Map(prevTodos.todoMap).set(id, newTodo);
+      const newOrder = [id, ...prevTodos.todoOrder];
+      return { todoMap: newMap, todoOrder: newOrder };
+    });
     setInputText("");
   }
 
   function deleteHandler(id) {
-    setTodoMap((prevMap) => {
-      const newMap = new Map(prevMap);
+    setTodos((prevTodos) => {
+      const newMap = new Map(prevTodos.todoMap);
       newMap.delete(id);
-      return newMap;
+      const newOrder = prevTodos.todoOrder.filter((i) => i !== id);
+      return { todoMap: newMap, todoOrder: newOrder };
     });
-    setTodoOrder((prevOrder) => prevOrder.filter((i) => i !== id));
   }
 
   function doneHandler(id) {
-    setTodoMap((prevMap) => {
-      const newMap = new Map(prevMap);
+    setTodos((prevTodos) => {
+      const newMap = new Map(prevTodos.todoMap);
       const todo = newMap.get(id);
       newMap.set(id, { ...todo, isDone: !todo.isDone });
-      return newMap;
+      return { ...prevTodos, todoMap: newMap };
     });
   }
 
   function updateNameHandler(id, newName) {
     if (newName.trim() === "") return;
-    setTodoMap((prevMap) => {
-      const newMap = new Map(prevMap);
+    setTodos((prevTodos) => {
+      const newMap = new Map(prevTodos.todoMap);
       const todo = newMap.get(id);
       newMap.set(id, { ...todo, name: newName });
-      return newMap;
+      return { ...prevTodos, todoMap: newMap };
     });
   }
 
@@ -59,35 +65,15 @@ function TodoList() {
         placeholder="Something to do"
       />
       <button onClick={() => addTodo(inputText)}>Add</button>
-      {todoOrder.map((id) => (
+      {todos.todoOrder.map((id) => (
         <Entry
           key={id}
-          todo={todoMap.get(id)}
+          todo={todos.todoMap.get(id)}
           deleteHandler={deleteHandler}
           doneHandler={doneHandler}
           updateNameHandler={updateNameHandler}
         />
       ))}
-    </div>
-  );
-}
-
-function Entry({ todo, deleteHandler, doneHandler, updateNameHandler }) {
-  return (
-    <div>
-      <input
-        type="text"
-        value={todo.name}
-        onChange={(e) => updateNameHandler(todo.id, e.target.value)}
-        style={{
-          textDecoration: todo.isDone ? "line-through" : "none",
-          color: todo.isDone ? "#888" : "black",
-        }}
-      />
-      <button onClick={() => doneHandler(todo.id)}>
-        {todo.isDone ? "Undo" : "Done"}
-      </button>
-      <button onClick={() => deleteHandler(todo.id)}>Delete</button>
     </div>
   );
 }
