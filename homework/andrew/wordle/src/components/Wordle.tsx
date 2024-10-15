@@ -177,17 +177,32 @@ function WordleKeyboard({ words, handleKeyPress }: WordleKeyboardInput) {
   );
 }
 
+interface GameResultDisplayInput {
+  answer: string;
+  gameResult: string;
+}
+function GameResultDisplay({ answer, gameResult }: GameResultDisplayInput) {
+  return (
+    <div>
+      {gameResult === "win" ? <h1>Congratulations!</h1> : <h1>You lose...</h1>}
+      <p>{`The Answer is ${answer}`}</p>
+    </div>
+  );
+}
+
 export default function Wordle() {
   const [answer, setAnswer] = useState("LAGER");
   const [words, setWords] = useState<wordData[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [isGameOver, setIsGameOver] = useState(false);
+  const [gameResult, setGameResult] = useState<string | null>(null);
 
   function resetGame() {
     setAnswer(answer === "FLOUR" ? "LAGER" : "FLOUR");
     setWords([]);
     setInputValue("");
     setIsGameOver(false);
+    setGameResult(null);
   }
 
   const handleSubmit = useCallback(
@@ -250,7 +265,7 @@ export default function Wordle() {
   useEffect(() => {
     // win
     if (words.some((word) => word.map((c) => c.c).join("") === answer)) {
-      alert("You win!");
+      setGameResult("win");
       setIsGameOver(true);
     }
 
@@ -259,14 +274,16 @@ export default function Wordle() {
       words.length === MAX_GUESS_ATTEMPTS &&
       !words.some((word) => word.map((c) => c.c).join("") === answer)
     ) {
-      alert("You lose!");
+      setGameResult("lose");
       setIsGameOver(true);
     }
   }, [words, answer]);
 
   return (
     <div className="Wordle flex flex-col justify-center items-center">
-      <p>The answer is {answer}.</p>
+      {isGameOver ? (
+        <GameResultDisplay answer={answer} gameResult={gameResult!} />
+      ) : null}
       <GameBoard words={wordsDisplay} />
       <div className="grid grid-cols-3 items-center w-full">
         <div className="col-start-2 col-span-1 place-self-center w-full max-w-lg">
