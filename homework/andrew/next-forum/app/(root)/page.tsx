@@ -1,10 +1,9 @@
 import HeaderBox from "@/components/HeaderBox";
 import TotalBalanceBox from "@/components/TotalBalanceBox";
 import RightSidebar from "@/components/RightSidebar";
-import { getLoggedInUser } from "@/lib/actions/user.actions";
 
 export default async function Home() {
-  const loggedIn = await getLoggedInUser();
+  const loggedIn = { $id: 1, email: "andrew@example.com", name: "Andrew Tsai" };
 
   return (
     <section className="home">
